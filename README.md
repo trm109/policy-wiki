@@ -1,2 +1,2 @@
 # Policy Wiki
-\[WIP\] Non Partisan US policy & politican information statistics.
+\[WIP\] Wiki for non-partisan U.S. policy & political information and statistics.
