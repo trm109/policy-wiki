@@ -42,34 +42,44 @@
     echo "Not yet implemented"
   '';
   
-  # Ensure lib/htmx.min.js exists, else, wget https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js
-  scripts.checkDevDeps.exec = ''
-    echo "Checking dev dependencies"
-    if [ ! -f $DEVENV_ROOT/lib/htmx.min.js ]; then
-      echo "Missing lib/htmx.min.js, downloading"
-      wget https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js -O $DEVENV_ROOT/lib/htmx.min.js
-    fi
-  '';
-
   enterShell = ''
     echo "Entering shell"
-    echo "Checking dev dependencies"
-    
   '';
 
   # https://devenv.sh/tasks/
   tasks = {
-    "devenv:enterShell".after = ["enterShell"];
+    "bash:checkDevDeps" = {
+      exec = ''
+        echo "Checking dev dependencies"
+        if [ ! -f $DEVENV_ROOT/lib/htmx.min.js ]; then
+          echo "Missing lib/htmx.min.js, downloading"
+          wget https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js -O $DEVENV_ROOT/lib/htmx.min.js
+        else
+          echo "lib/htmx.min.js exists"
+        fi
+        echo "Checking sha256 checksums"
+        sha256sum --check lib/checksum
+        if [ $? -ne 0 ]; then
+          echo "Checksums do not match"
+          exit 1
+        else
+          echo "Checksums match"
+        fi
+        echo "Checking dev dependencies done"
+        exit 0
+      '';
+      after = ["devenv:enterShell"];
+    };
   };
 
-  # https://devenv.sh/tests/
+# https://devenv.sh/tests/
   enterTest = ''
     echo "Running tests"
     git --version | grep --color=auto "${pkgs.git.version}"
-  '';
+    '';
 
-  # https://devenv.sh/pre-commit-hooks/
-  # pre-commit.hooks.shellcheck.enable = true;
+# https://devenv.sh/pre-commit-hooks/
+# pre-commit.hooks.shellcheck.enable = true;
 
-  # See full reference at https://devenv.sh/reference/options/
+# See full reference at https://devenv.sh/reference/options/
 }
