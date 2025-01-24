@@ -41,36 +41,34 @@
   scripts.build.exec = ''
     echo "Not yet implemented"
   '';
+  scripts.checkDevDeps.exec = ''
+    echo "Checking dev dependencies"
+    if [ ! -f $DEVENV_ROOT/lib/htmx.min.js ]; then
+      echo "Missing lib/htmx.min.js, downloading"
+      wget https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js -O $DEVENV_ROOT/lib/htmx.min.js
+    else
+      echo "lib/htmx.min.js exists"
+    fi
+    echo "Checking sha256 checksums"
+    sha256sum --check lib/checksum
+    if [ $? -ne 0 ]; then
+      echo "Checksums do not match"
+      exit 1
+    else
+      echo "Checksums match"
+    fi
+    echo "Checking dev dependencies done"
+    exit 0
+  '';
   
   enterShell = ''
     echo "Entering shell"
+    checkDevDeps
   '';
 
   # https://devenv.sh/tasks/
-  tasks = {
-    "bash:checkDevDeps" = {
-      exec = ''
-        echo "Checking dev dependencies"
-        if [ ! -f $DEVENV_ROOT/lib/htmx.min.js ]; then
-          echo "Missing lib/htmx.min.js, downloading"
-          wget https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js -O $DEVENV_ROOT/lib/htmx.min.js
-        else
-          echo "lib/htmx.min.js exists"
-        fi
-        echo "Checking sha256 checksums"
-        sha256sum --check lib/checksum
-        if [ $? -ne 0 ]; then
-          echo "Checksums do not match"
-          exit 1
-        else
-          echo "Checksums match"
-        fi
-        echo "Checking dev dependencies done"
-        exit 0
-      '';
-      after = ["devenv:enterShell"];
-    };
-  };
+  #tasks = {
+  #};
 
 # https://devenv.sh/tests/
   enterTest = ''
